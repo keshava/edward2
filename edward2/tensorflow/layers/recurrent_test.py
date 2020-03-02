@@ -63,6 +63,11 @@ class RecurrentTest(parameterized.TestCase, tf.test.TestCase):
        "recurrent_initializer": "orthogonal",
        "bias_initializer": "trainable_normal",
        "all_close": False},
+      {"lstm_cell": ed.layers.LSTMCellReparameterization,
+       "kernel_initializer": "trainable_deterministic",
+       "recurrent_initializer": "trainable_deterministic",
+       "bias_initializer": "trainable_deterministic",
+       "all_close": True},
   )
   def testLSTMCell(self,
                    lstm_cell,

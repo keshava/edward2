@@ -107,26 +107,14 @@ class LSTMCellReparameterization(tf.keras.layers.LSTMCell):
         constraint=self.recurrent_constraint)
 
     if self.use_bias:
-      if self.unit_forget_bias:
-        if isinstance(self.bias_initializer, tf.keras.layers.Layer):
-          def bias_mean_initializer(_, *args, **kwargs):
-            return tf.concat([
-                tf.keras.initializers.TruncatedNormal(
-                    stddev=1e-5)((self.units,), *args, **kwargs),
-                tf.keras.initializers.TruncatedNormal(
-                    mean=1., stddev=1e-5)((self.units,), *args, **kwargs),
-                tf.keras.initializers.TruncatedNormal(
-                    stddev=1e-5)((self.units * 2,), *args, **kwargs),
-            ], axis=0)
-          bias_initializer = initializers.TrainableNormal(
-              mean_initializer=bias_mean_initializer)
-        else:
-          def bias_initializer(_, *args, **kwargs):
-            return tf.keras.backend.concatenate([
-                self.bias_initializer((self.units,), *args, **kwargs),
-                tf.keras.initializers.Ones()((self.units,), *args, **kwargs),
-                self.bias_initializer((self.units * 2,), *args, **kwargs),
-            ])
+      if (self.unit_forget_bias and not isinstance(self.bias_initializer,
+                                                   tf.keras.layers.Layer)):
+        def bias_initializer(_, *args, **kwargs):
+          return tf.keras.backend.concatenate([
+              self.bias_initializer((self.units,), *args, **kwargs),
+              tf.keras.initializers.Ones()((self.units,), *args, **kwargs),
+              self.bias_initializer((self.units * 2,), *args, **kwargs),
+          ])
       else:
         bias_initializer = self.bias_initializer
       self.bias = self.add_weight(
